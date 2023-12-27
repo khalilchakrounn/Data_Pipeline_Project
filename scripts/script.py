@@ -63,17 +63,24 @@ vote_per_candidat= df.groupBy("Candidat").agg(count("*").alias("Nombre_de_votes"
 # and then by groupping the the votes by candiat by sex
 vote_per_candidat_per_genre= df.groupBy("Candidat","Civilité").agg(count("*").alias("Nombre_de_votes")).orderBy("Candidat", ascending=False)
 vote_per_candidat_per_genre=vote_per_candidat_per_genre.filter("Nombre_de_votes >= 200")
+vote_per_candidat = vote_per_candidat.toPandas()
 vote_per_candidat_per_genre = vote_per_candidat_per_genre.toPandas()
 fig, ax = plt.subplots(figsize=(10, 6))
 hommes = vote_per_candidat_per_genre[vote_per_candidat_per_genre ['Civilité'] == 'H']
 femmes = vote_per_candidat_per_genre[vote_per_candidat_per_genre ['Civilité'] == 'F']
-ax.barh(np.arange(len(hommes['Candidat']))+ 0.2, hommes['Nombre_de_votes'], label='Hommes', color='blue')
-ax.barh(np.arange(len(femmes['Candidat']))+ 0.4, femmes['Nombre_de_votes'], label='Femmes', color='pink')
-ax.set_yticks(np.arange(len(vote_per_candidat_per_genre['Candidat'])))
-ax.set_yticklabels(vote_per_candidat_per_genre['Candidat'])
-ax.set_xlabel('Nombre de votes')
+ax.barh(hommes['Candidat'], hommes['Nombre_de_votes'], label='Hommes', color='blue')
+ax.barh(femmes['Candidat'], femmes['Nombre_de_votes'], label='Femmes', color='pink')
+ax.set_xlabel('Candidat')
+ax.set_ylabel('Nombre de votes')
 ax.set_title('Nombre de votes par candidat et par genre')
 ax.legend()
+plt.show()
+
+
+
+fig, ax = plt.subplots(figsize=(8, 8))
+ax.pie(vote_per_candidat['Nombre_de_votes'], labels=vote_per_candidat['Candidat'], counterclock=False)
+ax.set_title('Répartition des votes par candidat')
 plt.show()
 
 
