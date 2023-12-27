@@ -4,12 +4,16 @@ import pyspark
 import random
 from pyspark.sql.functions import countDistinct, count, when
 from pyspark.sql.functions import col, collect_list, year, month, dayofmonth
+import matplotlib.pyplot as plt
+import numpy as np
 
-sc=SparkContext('local[*]','MyStreamJob')
+sc = pyspark.SparkContext('local')
+sc = SparkSession(sc) 
 sc.setLogLevel('ERROR')
 
 #importing the data, the file is renamed by the nifi process to mergedData and it contains all data downloaded
 df= spark.read.csv("./../DataPipeline/data merged/mergedData", header=True, inferSchema=True, sep=';')
+#maybe change the spark to sc if it doesn't work
 
 # first task of cleaning is dropping the duplicates
 df= df.dropDuplicates()
@@ -57,4 +61,19 @@ df.write.csv("./../DataPipeline/data merged/processedData", header=True, mode='o
 vote_per_candidat= df.groupBy("Candidat").agg(count("*").alias("Nombre_de_votes")).orderBy("Nombre_de_votes", ascending=False)
 
 # and then by groupping the the votes by candiat by sex
-vote_per_candidat= df.groupBy("Candidat","Civilité").agg(count("*").alias("Nombre_de_votes")).orderBy("Candidat", ascending=False)
+vote_per_candidat_per_genre= df.groupBy("Candidat","Civilité").agg(count("*").alias("Nombre_de_votes")).orderBy("Candidat", ascending=False)
+vote_per_candidat_per_genre=vote_per_candidat_per_genre.filter("Nombre_de_votes >= 200")
+vote_per_candidat_per_genre = vote_per_candidat_per_genre.toPandas()
+fig, ax = plt.subplots(figsize=(10, 6))
+hommes = vote_per_candidat_per_genre[vote_per_candidat_per_genre ['Civilité'] == 'H']
+femmes = vote_per_candidat_per_genre[vote_per_candidat_per_genre ['Civilité'] == 'F']
+ax.barh(np.arange(len(hommes['Candidat']))+ 0.2, hommes['Nombre_de_votes'], label='Hommes', color='blue')
+ax.barh(np.arange(len(femmes['Candidat']))+ 0.4, femmes['Nombre_de_votes'], label='Femmes', color='pink')
+ax.set_yticks(np.arange(len(vote_per_candidat_per_genre['Candidat'])))
+ax.set_yticklabels(vote_per_candidat_per_genre['Candidat'])
+ax.set_xlabel('Nombre de votes')
+ax.set_title('Nombre de votes par candidat et par genre')
+ax.legend()
+plt.show()
+
+
