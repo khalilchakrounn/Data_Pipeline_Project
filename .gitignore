@@ -1,4 +1,6 @@
 airflow/logs
+airflow/dags/__pycache__
+airflow/dags/scripts_airflow/__pycache__
 
 airflow/airflow-webserver.pid
 airflow/standalone_admin_password.txt
