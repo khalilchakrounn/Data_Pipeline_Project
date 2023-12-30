@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 from pyspark.context import SparkContext
-import pyspark
 import random
 from pyspark.sql.functions import countDistinct, count, when
 from pyspark.sql.functions import col, collect_list, year, month, dayofmonth
@@ -8,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def main():
-    sc = pyspark.SparkContext('local')
     sc = SparkSession(sc) 
     sc.setLogLevel('ERROR')
 
@@ -30,14 +28,14 @@ def main():
         count_unique = df.select(column).agg(countDistinct(column)).collect()[0][0]
         print(f"number of unique values in  column '{column}': {count_unique}")
 
-#number of unique values in  column 'Civilité': 3                         
-#number of unique values in  column 'Nom': 10310                          
-#number of unique values in  column 'Prénom': 1616                        
-#number of unique values in  column 'Mandat': 30
-#number of unique values in  column 'Circonscription': 8891               
-#number of unique values in  column 'Département': 111
-#number of unique values in  column 'Candidat': 66
-#number of unique values in  column 'Date de publication': 12
+    #number of unique values in  column 'Civilité': 3                         
+    #number of unique values in  column 'Nom': 10310                          
+    #number of unique values in  column 'Prénom': 1616                        
+    #number of unique values in  column 'Mandat': 30
+    #number of unique values in  column 'Circonscription': 8891               
+    #number of unique values in  column 'Département': 111
+    #number of unique values in  column 'Candidat': 66
+    #number of unique values in  column 'Date de publication': 12
 
 
     #next step, check if there are typos in these columns to fix them
@@ -45,11 +43,11 @@ def main():
         valeurs_distinctes = df.select(column).distinct().agg(collect_list(col(column))).collect()[0][0]
         print(f" unique values in column '{column}': {valeurs_distinctes}")
 
-#unique values in column 'Civilité': ['M.', 'Civilité', 'Mme']
-#unique values in column 'Date de publication': ['08/02/2022', '01/02/2022', '03/02/2022', '10/02/2022', '24/02/2022', '22/02/2022', '07/03/2022', '01/03/2022', '17/02/2022', '03/03/2022', 'Date de publication', '15/02/2022']
+    #unique values in column 'Civilité': ['M.', 'Civilité', 'Mme']
+    #unique values in column 'Date de publication': ['08/02/2022', '01/02/2022', '03/02/2022', '10/02/2022', '24/02/2022', '22/02/2022', '07/03/2022', '01/03/2022', '17/02/2022', '03/03/2022', 'Date de publication', '15/02/2022']
 
-## no typos detected. we can perserve the data at this state.
-# we notice that all data was geenrated at either 03/2022 or 02/2022 which means no need to keep the year in the date
+    ## no typos detected. we can perserve the data at this state.
+    # we notice that all data was geenrated at either 03/2022 or 02/2022 which means no need to keep the year in the date
 
     df = df.withColumn("Month", month(col("Date de publication"))).withColumn("day", dayofmonth(col("Date de publication")))
     df=df.drop('Date de publication')
@@ -85,4 +83,4 @@ def main():
     plt.show()
 
 
-main()
+
